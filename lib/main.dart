@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -25,7 +27,7 @@ class IntroPage extends StatelessWidget {
   void navigateToLoginPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MyHomePage(title: 'sign')),
+      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'sign')),
     );
   }
 
@@ -33,16 +35,16 @@ class IntroPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            FlutterLogo(
+            const FlutterLogo(
               size: 150.0,
             ),
-            SizedBox(height: 50.0),
-            Text(
+            const SizedBox(height: 50.0),
+            const Text(
               'Famnet',
               style: TextStyle(
                 fontSize: 24.0,
@@ -50,19 +52,20 @@ class IntroPage extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 20.0),
-            Text(
+            const SizedBox(height: 20.0),
+            const Text(
               'A platform built to connect with family',
               style: TextStyle(
                 fontSize: 16.0,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 80.0),
-
+            const SizedBox(height: 80.0),
             ElevatedButton(
-              onPressed: () { navigateToLoginPage(context); },
-              child: Row(
+              onPressed: () {
+                navigateToLoginPage(context);
+              },
+              child: const Row(
                 children: <Widget>[
                   Expanded(
                     child: Align(
@@ -73,7 +76,8 @@ class IntroPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios), // Replace with the desired icon
+                  Icon(Icons.arrow_forward_ios),
+                  // Replace with the desired icon
                 ],
               ),
             ),
@@ -97,6 +101,18 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   bool _obscureText = true;
+  final _formKey = GlobalKey<FormState>();
+  String _email = '';
+  String _password = '';
+
+  void _submitForm(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      // Perform signup functionality with validated email and password
+      stdout.writeln('Signup successful!');
+    }
+    stdout.writeln('Email: $_email');
+    stdout.writeln('Password: $_password');
+  }
 
   void navigateToMainPage(BuildContext context) {
     Navigator.push(
@@ -106,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _togglePasswordVisibility() {
+    stdout.writeln('hi');
     setState(() {
       _obscureText = !_obscureText;
     });
@@ -114,108 +131,157 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20.0,8,20.0,8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              SizedBox(height: 80),
-              const Text(
-                'Famnet',
-                style: TextStyle(fontWeight: FontWeight.bold,fontSize: 25,),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 12.0),
-              const Text(
-                'Family at your fingertips',
-                style: TextStyle(fontSize: 18,),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 70.0),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(20.0, 8, 20.0, 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const SizedBox(height: 80),
+                const Text(
+                  'Famnet',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                const SizedBox(height: 12.0),
+                const Text(
+                  'Family at your fingertips',
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 70.0),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter an email';
+                    } else if (!RegExp(r'^.+@.+\..+$').hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _email = value!;
+                  },
+                ),
+                const SizedBox(height: 20.0),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: _togglePasswordVisibility,
                     ),
-                    onPressed: _togglePasswordVisibility,
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a password';
+                    } else if (value.length < 8) {
+                      return 'Password must be at least 8 characters long';
+                    } else if (!RegExp(
+                            r'^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
+                        .hasMatch(value)) {
+                      return 'Password must contain at least one capital letter, \none number, and one special character';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _password = value!;
+                  },
+                  obscureText: _obscureText,
+                ),
+                const SizedBox(height: 30.0),
+                ElevatedButton(
+                  onPressed: () {
+                    //navigateToMainPage(context);
+                    _submitForm(context);
+                  },
+                  child: const Row(
+                    children: [
+                      Expanded(
+                          child: Align(
+                        child: Text('Continue'),
+                      )),
+                      Icon(Icons.arrow_forward_ios)
+                    ],
+                  ),
+                  style: const ButtonStyle(),
+                ),
+                const SizedBox(height: 15.0),
+                const Text(
+                  'or',
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 15.0),
+                Container(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image(
+                          fit: BoxFit.cover,
+                          height: 15,
+                          image: AssetImage("images/google_logo.png"),
+                        ),
+                        SizedBox(width: 7.0),
+                        Text('Continue with Google'),
+                      ],
+                    ),
+                    style: const ButtonStyle(),
                   ),
                 ),
-                obscureText: _obscureText,
-              ),
-              SizedBox(height: 30.0),
-
-              ElevatedButton(
-                onPressed: (){navigateToMainPage(context);},
-                child: Row(
+                const SizedBox(height: 15.0),
+                Container(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image(
+                          fit: BoxFit.cover,
+                          height: 15,
+                          image: AssetImage("images/apple_logo.png"),
+                        ),
+                        SizedBox(width: 7.0),
+                        Text('Continue with Apple'),
+                      ],
+                    ),
+                    style: const ButtonStyle(),
+                  ),
+                ),
+                const SizedBox(height: 20.0),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                        child: Align (
-                            child: Text('Continue'),
-                        )
-                    ),
-                    Icon(Icons.arrow_forward_ios)
+                    Text('Don\'t have an account? '),
+                    Text(
+                      'Register',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )
                   ],
-                ),
-                style: ButtonStyle(),
-                
-              ),
-
-              SizedBox(height: 15.0),
-
-              const Text(
-                'or',
-                style: TextStyle(fontSize: 15,),
-                textAlign: TextAlign.center,
-              ),
-
-              SizedBox(height: 15.0),
-
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: (){},
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image(fit: BoxFit.cover, height: 15, image: AssetImage("images/google_logo.png"),),
-                      SizedBox(width: 7.0),
-                      Text('Continue with Google'),
-                    ],
-                  ),
-                  style: ButtonStyle(),
-                ),
-              ),
-
-              SizedBox(height: 15.0),
-
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: (){},
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image(fit: BoxFit.cover, height: 15, image: AssetImage("images/apple_logo.png"),),
-                      SizedBox(width: 7.0),
-                      Text('Continue with Apple'),
-                    ],
-                  ),
-                  style: ButtonStyle(),
-                ),
-              ),
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -241,11 +307,10 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: const Text('Main Page'),
       ),
       body: Container(
-
-        child: Center(
+        child: const Center(
           child: Text(
             'Welcome to the Main Page',
             style: TextStyle(fontSize: 24.0),
@@ -258,19 +323,19 @@ class _MainPageState extends State<MainPage> {
         currentIndex: _currentIndex,
         onTap: onTabTapped,
         items: [
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.update),
             label: 'Updates',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chats',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.family_restroom),
             label: 'Family Tree',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
